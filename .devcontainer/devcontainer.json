@@ -1,0 +1,71 @@
+{
+  "name": "VinciConcorsi Quiz App",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  // Forward Next.js dev server and Drizzle Studio ports
+  "forwardPorts": [
+    3000,
+    4983
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js Dev Server",
+      "onAutoForward": "notify"
+    },
+    "4983": {
+      "label": "Drizzle Studio",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Claude Code — requires the CLI installed in the container (done in Dockerfile)
+        "anthropic.claude-code",
+        // TypeScript / Next.js
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        // Tailwind CSS class autocomplete
+        "bradlc.vscode-tailwindcss",
+        // Container management (Docker / devcontainer UI)
+        "ms-azuretools.vscode-containers"
+      ],
+      "settings": {
+        // Use project TypeScript installation
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        // Format on save with Prettier
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        // ESLint auto-fix on save
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        // Tailwind: include .tsx files for class suggestions
+        "tailwindCSS.includeLanguages": {
+          "typescriptreact": "html"
+        },
+        // Exclude generated/build artifacts from explorer
+        "files.exclude": {
+          "**/.next": true,
+          "**/node_modules": true
+        }
+      }
+    }
+  },
+  // Install project dependencies after the container is created.
+  // Using "npm install" instead of "npm ci" because the lock file was generated on a different
+  // platform and is missing Linux x64 optional binaries (esbuild, @next/swc, sharp, etc.).
+  // Once a Linux-generated lock file is committed, this can be changed back to "npm ci".
+  "postCreateCommand": "npm install",
+  // Run as the non-root 'node' user provided by the base image
+  "remoteUser": "node"
+}
