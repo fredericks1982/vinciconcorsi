@@ -1,4 +1,4 @@
-# Quiz Concorso Rezzato — MVP Specifications
+# VinciConcorsi.it — MVP Specifications
 
 ## 1. What We're Building
 
@@ -220,7 +220,7 @@ Concretely:
 ### 6.1 Homepage (`/`)
 
 **Layout:**
-- Title: "Quiz Concorso Rezzato" with subtitle "Preparazione Istruttore Amministrativo - Servizi Demografici"
+- Title: "VinciConcorsi.it" with subtitle "Preparazione Istruttore Amministrativo - Servizi Demografici"
 - Subject grid: cards or checkboxes, one per subject. Each shows name + question count + colored badge. All selected by default.
 - "Seleziona tutte" / "Deseleziona tutte" toggle
 - Number input: "Numero domande" — default 15, min 1, max = total available for selected subjects

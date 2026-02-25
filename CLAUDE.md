@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Quiz web app for Italian public administration exam preparation (Concorso Istruttore Amministrativo - Servizi Demografici). Single-user MVP focused on practicing multiple-choice questions organized by subject area.
+vinciconcorsi.it — Quiz web app for Italian public administration exam preparation (Concorso Istruttore Amministrativo - Servizi Demografici). Single-user MVP focused on practicing multiple-choice questions organized by subject area.
 
 ## Tech Stack
 
@@ -16,7 +16,7 @@ Quiz web app for Italian public administration exam preparation (Concorso Istrut
 ## Project Structure
 
 ```
-quiz-concorso/
+vinciconcorsi.it/
 ├── CLAUDE.md
 ├── docs/
 │   └── specs.md                 # Functional specs — READ THIS FIRST

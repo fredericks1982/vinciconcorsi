@@ -7,7 +7,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Quiz Concorso Rezzato",
+  title: "VinciConcorsi.it",
   description: "Preparazione Istruttore Amministrativo - Servizi Demografici",
 };
 
@@ -24,7 +24,7 @@ export default function RootLayout({
             <header className="border-b border-border">
               <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
                 <span className="text-sm font-medium text-muted-foreground">
-                  Quiz Concorso
+                  VinciConcorsi.it
                 </span>
                 <ThemeToggle />
               </div>

@@ -1,5 +1,5 @@
 {
-  "name": "VinciConcorsi Quiz App",
+  "name": "VinciConcorsi.it",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
