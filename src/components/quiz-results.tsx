@@ -58,7 +58,17 @@ export function QuizResults({ questions, answers }: QuizResultsProps) {
         <p className="text-6xl font-bold">
           {correct}/{total}
         </p>
-        <p className="mt-2 text-2xl text-muted-foreground">{percentage}%</p>
+        <p
+          className={`mt-2 text-2xl font-semibold ${
+            percentage === 100
+              ? "text-green-600 dark:text-green-400"
+              : percentage >= 80
+                ? "text-yellow-500 dark:text-yellow-400"
+                : "text-red-600 dark:text-red-400"
+          }`}
+        >
+          {percentage}%
+        </p>
       </div>
 
       {/* Subject breakdown */}
@@ -83,9 +93,9 @@ export function QuizResults({ questions, answers }: QuizResultsProps) {
                   className={`text-xs font-medium ${
                     s.correct === s.total
                       ? "text-green-600 dark:text-green-400"
-                      : s.correct === 0
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-muted-foreground"
+                      : Math.round((s.correct / s.total) * 100) >= 80
+                        ? "text-yellow-500 dark:text-yellow-400"
+                        : "text-red-600 dark:text-red-400"
                   }`}
                 >
                   {Math.round((s.correct / s.total) * 100)}%
