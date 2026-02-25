@@ -18,7 +18,7 @@ dist/
 # questions.example.ts (structure only, no real data) IS committed.
 seed-data/questions.ts
 seed-data/questions-*.ts
-!seed-data/questions.example.ts
+!seed-data/questions.example.ts  # exception: re-include this file despite the pattern above
 
 # Environment variables
 .env
