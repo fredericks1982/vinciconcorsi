@@ -127,6 +127,10 @@ npm install -D drizzle-kit @types/better-sqlite3 tsx
 npx shadcn@latest add button card checkbox badge progress radio-group
 ```
 
+## Git & GitHub Conventions
+
+- **Never add Claude Code attribution** to commit messages or PR descriptions. Do not include `Co-Authored-By: Claude` lines, "Generated with Claude Code" footers, or any other Claude/Anthropic branding in commits or PRs.
+
 ## Important Notes
 
 - **Read `docs/specs.md` before writing any code.** It contains the complete functional specification, DB schema, UI behavior, and component details.
