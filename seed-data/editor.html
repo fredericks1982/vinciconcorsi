@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor Domande — Vinci Concorsi</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --modified-border: #f59e0b;
+      --modified-bg: #fffbeb;
+      --correct-color: #16a34a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+
+    .header-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--bg);
+      border: 1px dashed #9ca3af;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .file-label:hover { border-color: var(--primary); color: var(--primary); }
+    #fileInput { display: none; }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      padding: 7px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-tabs {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .filter-tab {
+      padding: 5px 14px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .filter-tab.active { background: var(--primary); color: white; }
+
+    .search-input {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 260px;
+      background: white;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    .filter-count {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Questions list ── */
+    .questions-list {
+      padding: 16px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state h2 { font-size: 1.1rem; margin-bottom: 6px; color: var(--text); }
+    .empty-state code {
+      background: var(--border);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    /* ── Question card ── */
+    .question-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .question-card.modified {
+      border-color: var(--modified-border);
+      background: var(--modified-bg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .question-number {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .subject-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .modified-badge {
+      margin-left: auto;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .question-text {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    /* ── Subject select ── */
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .field-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .subject-select {
+      flex: 1;
+      max-width: 320px;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: white;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .subject-select:focus { border-color: var(--primary); }
+
+    /* ── Answer options ── */
+    .options-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: white;
+    }
+    .option-label:hover { border-color: #93c5fd; background: #eff6ff; }
+    .option-label.selected {
+      border-color: var(--correct-color);
+      background: #f0fdf4;
+    }
+    .option-radio {
+      flex-shrink: 0;
+      margin-top: 2px;
+      accent-color: var(--correct-color);
+    }
+    .option-letter {
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      padding-top: 1px;
+      color: var(--text-muted);
+    }
+    .option-label.selected .option-letter { color: var(--correct-color); }
+    .option-text { font-size: 0.875rem; line-height: 1.4; }
+
+    .question-source {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">Editor Domande</div>
+  <label class="file-label" for="fileInput">📂 Seleziona file .ts</label>
+  <input type="file" id="fileInput" accept=".ts">
+  <div class="file-info" id="fileInfo">Nessun file caricato</div>
+  <button class="btn btn-primary" id="exportBtn" disabled>⬇ Esporta file corretto</button>
+</header>
+
+<div class="filter-bar" id="filterBar" style="display:none">
+  <div class="filter-tabs">
+    <button class="filter-tab active" data-filter="all">Tutte</button>
+    <button class="filter-tab" data-filter="modified">Solo modificate</button>
+  </div>
+  <input type="search" class="search-input" id="searchInput" placeholder="Cerca nel testo delle domande…">
+  <div class="filter-count" id="filterCount"></div>
+</div>
+
+<main class="questions-list" id="questionsList">
+  <div class="empty-state">
+    <div class="icon">📝</div>
+    <h2>Seleziona un file</h2>
+    <p>Carica un file <code>.ts</code> nel formato <code>questions.example.ts</code></p>
+  </div>
+</main>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  fileName: '',
+  beforeArray: '',   // raw text up to and including the opening '['
+  arrayContent: '',  // raw text between '[' and ']' of QUESTIONS_DATA
+  afterArray: '',    // raw text from ']' onwards
+  subjects: [],      // [{ name, slug, color }]
+  questions: [],     // parsed question objects
+  filter: 'all',     // 'all' | 'modified'
+  searchText: '',
+};
+
+// ─── Parsing ──────────────────────────────────────────────────────────────────
+
+/** Find the char-index bounds of the assignment array `varName = [...]`. */
+function findArrayBounds(text, varName) {
+  const varIdx = text.indexOf(varName);
+  if (varIdx === -1) return null;
+  // Use '= [' to skip type annotations like 'SeedQuestion[]' on the same line
+  const assignIdx = text.indexOf('= [', varIdx);
+  if (assignIdx === -1) return null;
+  const arrayStart = assignIdx + 2; // index of '['
+  let depth = 0;
+  let inString = false, stringChar = '';
+  for (let i = arrayStart; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (ch === '\\') { i++; continue; }
+      if (ch === stringChar) inString = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { inString = true; stringChar = ch; continue; }
+    if (ch === '[') depth++;
+    else if (ch === ']') { depth--; if (depth === 0) return { start: arrayStart, end: i }; }
+  }
+  return null;
+}
+
+/**
+ * Extract a string field value from a question block.
+ * Uses multiline ^ so it won't match commented-out fields (// fieldName: "...").
+ * Handles basic escaped quotes (\") inside strings.
+ */
+function parseField(block, fieldName) {
+  const re = new RegExp('^\\s*' + fieldName + ':\\s*"((?:[^"\\\\]|\\\\.)*)"', 'm');
+  const m = block.match(re);
+  return m ? m[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : null;
+}
+
+/** Parse SUBJECTS_DATA array into [{ name, slug, color }]. */
+function parseSubjects(text) {
+  const bounds = findArrayBounds(text, 'SUBJECTS_DATA');
+  if (!bounds) return [];
+  const content = text.substring(bounds.start + 1, bounds.end);
+  const re = /\{\s*name:\s*"([^"]*)"\s*,\s*slug:\s*"([^"]*)"\s*,\s*color:\s*"([^"]*)"\s*\}/g;
+  const results = [];
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    results.push({ name: m[1], slug: m[2], color: m[3] });
+  }
+  return results;
+}
+
+/** Split array content into individual {…} top-level blocks with positions.
+ *  Skips { and } inside strings to avoid being tricked by braces in question text. */
+function extractBlocks(content) {
+  const blocks = [];
+  let depth = 0;
+  let blockStart = -1;
+  let inString = false, stringChar = '';
+  for (let i = 0; i < content.length; i++) {
+    const ch = content[i];
+    if (inString) {
+      if (ch === '\\') { i++; continue; } // skip escaped char
+      if (ch === stringChar) inString = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { inString = true; stringChar = ch; continue; }
+    if (ch === '{') { if (depth === 0) blockStart = i; depth++; }
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0 && blockStart >= 0) {
+        blocks.push({ raw: content.substring(blockStart, i + 1), start: blockStart, end: i + 1 });
+        blockStart = -1;
+      }
+    }
+  }
+  return blocks;
+}
+
+/** Parse all question fields from a raw block string. */
+function parseFields(raw) {
+  return {
+    subjectSlug:   parseField(raw, 'subjectSlug')   ?? '',
+    text:          parseField(raw, 'text')           ?? '',
+    optionA:       parseField(raw, 'optionA')        ?? '',
+    optionB:       parseField(raw, 'optionB')        ?? '',
+    optionC:       parseField(raw, 'optionC')        ?? '',
+    correctAnswer: parseField(raw, 'correctAnswer')  ?? 'A',
+    source:        parseField(raw, 'source')         ?? '',
+    explanation:   parseField(raw, 'explanation'),   // may be null
+  };
+}
+
+/** Main entry point: parse a full file text and populate state. */
+function parseFile(text) {
+  // Subjects
+  state.subjects = parseSubjects(text);
+
+  // Questions array bounds
+  const bounds = findArrayBounds(text, 'QUESTIONS_DATA');
+  if (!bounds) throw new Error('QUESTIONS_DATA non trovato nel file.');
+
+  state.beforeArray  = text.substring(0, bounds.start + 1);
+  state.arrayContent = text.substring(bounds.start + 1, bounds.end);
+  state.afterArray   = text.substring(bounds.end);
+
+  const blocks = extractBlocks(state.arrayContent);
+  state.questions = blocks.map((b, index) => {
+    const fields = parseFields(b.raw);
+    return {
+      index,
+      rawBlock:   b.raw,
+      blockStart: b.start,
+      blockEnd:   b.end,
+      ...fields,
+      // Originals for change-tracking
+      originalSubjectSlug:   fields.subjectSlug,
+      originalCorrectAnswer: fields.correctAnswer,
+    };
+  });
+
+  // Fallback: derive subjects from unique slugs if SUBJECTS_DATA wasn't parseable
+  if (state.subjects.length === 0) {
+    const slugs = [...new Set(state.questions.map(q => q.subjectSlug).filter(Boolean))];
+    state.subjects = slugs.map(slug => ({ name: slug, slug, color: '#6b7280' }));
+  }
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+
+/** Reconstruct one question block with updated subjectSlug and correctAnswer. */
+function buildUpdatedBlock(q) {
+  let block = q.rawBlock;
+  // Replace only the unindented/indented field line (not commented-out lines).
+  // Group 1 captures "  subjectSlug: " so the quote style and comma are preserved.
+  block = block.replace(
+    /^(\s*subjectSlug:\s*)"(?:[^"\\]|\\.)*"/m,
+    `$1"${q.subjectSlug}"`
+  );
+  block = block.replace(
+    /^(\s*correctAnswer:\s*)"(?:[^"\\]|\\.)*"/m,
+    `$1"${q.correctAnswer}"`
+  );
+  return block;
+}
+
+function exportFile() {
+  // Work backwards through questions to preserve character positions
+  let content = state.arrayContent;
+  for (let i = state.questions.length - 1; i >= 0; i--) {
+    const q = state.questions[i];
+    const updated = buildUpdatedBlock(q);
+    if (updated !== q.rawBlock) {
+      content = content.substring(0, q.blockStart) + updated + content.substring(q.blockEnd);
+    }
+  }
+  const fullText = state.beforeArray + content + state.afterArray;
+
+  const blob = new Blob([fullText], { type: 'text/plain; charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = state.fileName.replace(/\.ts$/, '') + '.corrected.ts';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function getSubject(slug) {
+  return state.subjects.find(s => s.slug === slug) ?? { name: slug || '—', slug: slug || '', color: '#6b7280' };
+}
+
+function isModified(q) {
+  return q.subjectSlug !== q.originalSubjectSlug || q.correctAnswer !== q.originalCorrectAnswer;
+}
+
+function getModifiedCount() { return state.questions.filter(isModified).length; }
+
+function getFilteredQuestions() {
+  let list = state.questions;
+  if (state.filter === 'modified') list = list.filter(isModified);
+  if (state.searchText.trim()) {
+    const needle = state.searchText.toLowerCase();
+    list = list.filter(q =>
+      q.text.toLowerCase().includes(needle) ||
+      q.optionA.toLowerCase().includes(needle) ||
+      q.optionB.toLowerCase().includes(needle) ||
+      q.optionC.toLowerCase().includes(needle) ||
+      q.subjectSlug.toLowerCase().includes(needle) ||
+      (q.source && q.source.toLowerCase().includes(needle))
+    );
+  }
+  return list;
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+
+function renderAll() {
+  updateHeader();
+  document.getElementById('filterBar').style.display = 'flex';
+  renderQuestions();
+}
+
+function updateHeader() {
+  const modCount = getModifiedCount();
+  document.getElementById('fileInfo').textContent =
+    `${state.fileName}  —  ${state.questions.length} domande` +
+    (modCount > 0 ? `  —  ${modCount} modificat${modCount === 1 ? 'a' : 'e'}` : '');
+  document.getElementById('exportBtn').disabled = state.questions.length === 0;
+}
+
+function renderQuestions() {
+  const filtered = getFilteredQuestions();
+  const list = document.getElementById('questionsList');
+
+  // Update count
+  const total = state.questions.length;
+  document.getElementById('filterCount').textContent =
+    filtered.length === total ? `${total} domande` : `${filtered.length} di ${total}`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="icon">🔍</div>
+      <h2>Nessuna domanda trovata</h2>
+      <p>Prova a modificare i filtri o il testo di ricerca.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(q => buildCardHtml(q)).join('');
+
+  // Attach event listeners to newly rendered cards
+  filtered.forEach(q => {
+    const sel = document.getElementById(`subject-${q.index}`);
+    if (sel) {
+      sel.addEventListener('change', e => {
+        state.questions[q.index].subjectSlug = e.target.value;
+        refreshCard(q.index);
+        updateHeader();
+      });
+    }
+    ['A', 'B', 'C'].forEach(letter => {
+      const radio = document.getElementById(`q${q.index}-${letter}`);
+      if (radio) {
+        radio.addEventListener('change', () => {
+          state.questions[q.index].correctAnswer = letter;
+          refreshCard(q.index);
+          updateHeader();
+        });
+      }
+    });
+  });
+}
+
+function buildCardHtml(q) {
+  const subject = getSubject(q.subjectSlug);
+  const modified = isModified(q);
+
+  const subjectOptions = state.subjects
+    .map(s => `<option value="${escHtml(s.slug)}"${s.slug === q.subjectSlug ? ' selected' : ''}>${escHtml(s.name)}</option>`)
+    .join('');
+
+  const optionsHtml = ['A', 'B', 'C'].map(letter => {
+    const text = q[`option${letter}`];
+    const sel = q.correctAnswer === letter;
+    return `<label class="option-label${sel ? ' selected' : ''}" for="q${q.index}-${letter}">
+      <input class="option-radio" type="radio"
+        id="q${q.index}-${letter}" name="answer-${q.index}"
+        value="${letter}"${sel ? ' checked' : ''}>
+      <span class="option-letter">${letter}</span>
+      <span class="option-text">${escHtml(text)}</span>
+    </label>`;
+  }).join('');
+
+  return `<div class="question-card${modified ? ' modified' : ''}" id="card-${q.index}">
+  <div class="card-header">
+    <span class="question-number">#${q.index + 1}</span>
+    <span class="subject-badge" id="badge-${q.index}" style="background:${escHtml(subject.color)}">${escHtml(subject.name)}</span>
+    ${modified ? '<span class="modified-badge">modificata</span>' : ''}
+  </div>
+  <div class="question-text">${escHtml(q.text)}</div>
+  <div class="field-row">
+    <span class="field-label">Argomento</span>
+    <select class="subject-select" id="subject-${q.index}">${subjectOptions}</select>
+  </div>
+  <div class="options-label">Risposta corretta</div>
+  <div class="options-list">${optionsHtml}</div>
+  ${q.source ? `<div class="question-source">Fonte: ${escHtml(q.source)}</div>` : ''}
+</div>`;
+}
+
+/** Surgically update a card's visual state without re-rendering it. */
+function refreshCard(idx) {
+  const q = state.questions[idx];
+  const card = document.getElementById(`card-${idx}`);
+  if (!card) return;
+
+  // Modified class & badge
+  const modified = isModified(q);
+  card.classList.toggle('modified', modified);
+  const header = card.querySelector('.card-header');
+  const existingBadge = header.querySelector('.modified-badge');
+  if (modified && !existingBadge) {
+    header.insertAdjacentHTML('beforeend', '<span class="modified-badge">modificata</span>');
+  } else if (!modified && existingBadge) {
+    existingBadge.remove();
+  }
+
+  // Subject badge
+  const subject = getSubject(q.subjectSlug);
+  const badge = document.getElementById(`badge-${idx}`);
+  if (badge) { badge.style.background = subject.color; badge.textContent = subject.name; }
+
+  // Option selected state
+  ['A', 'B', 'C'].forEach(letter => {
+    const label = card.querySelector(`label[for="q${idx}-${letter}"]`);
+    if (label) label.classList.toggle('selected', q.correctAnswer === letter);
+  });
+
+  // Filter count
+  const filtered = getFilteredQuestions();
+  const total = state.questions.length;
+  document.getElementById('filterCount').textContent =
+    filtered.length === total ? `${total} domande` : `${filtered.length} di ${total}`;
+}
+
+// ─── Event listeners ──────────────────────────────────────────────────────────
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      parseFile(ev.target.result);
+      state.fileName = file.name;
+      renderAll();
+    } catch (err) {
+      alert('Errore nel caricamento del file:\n' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('exportBtn').addEventListener('click', exportFile);
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  state.searchText = e.target.value;
+  renderQuestions();
+});
+
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.filter = btn.dataset.filter;
+    renderQuestions();
+  });
+});
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq, sql } from "drizzle-orm";
 import { subjects, questions } from "./schema";
-import { SUBJECTS_DATA, QUESTIONS_DATA } from "../../seed-data/questions";
+import { SUBJECTS_DATA, QUESTIONS_DATA } from "../../seed-data/questions-unique";
 
 const sqlite = new Database("quiz.db");
 const db = drizzle(sqlite, { schema: { subjects, questions } });
