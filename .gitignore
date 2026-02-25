@@ -14,9 +14,11 @@ dist/
 *.db-wal
 
 # Seed data — PRIVATE, not committed to public repo
-# The questions.ts file contains the proprietary question bank.
+# All questions-*.ts files contain the proprietary question bank.
 # questions.example.ts (structure only, no real data) IS committed.
 seed-data/questions.ts
+seed-data/questions-*.ts
+!seed-data/questions.example.ts
 
 # Environment variables
 .env
