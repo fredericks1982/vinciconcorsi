@@ -1,6 +1,8 @@
 "use client";
 
 import { useReducer } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { QuizCard } from "@/components/quiz-card";
 import { QuizProgress } from "@/components/quiz-progress";
 import { QuizResults } from "@/components/quiz-results";
@@ -51,15 +53,23 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
 
 interface QuizClientProps {
   questions: QuizQuestion[];
+  showSubject: boolean;
 }
 
-export function QuizClient({ questions }: QuizClientProps) {
+export function QuizClient({ questions, showSubject }: QuizClientProps) {
+  const router = useRouter();
   const [state, dispatch] = useReducer(quizReducer, {
     questions,
     currentIndex: 0,
     answers: {},
     finished: false,
   });
+
+  function handleAbort() {
+    if (window.confirm("Vuoi interrompere il quiz e tornare alla home?")) {
+      router.push("/");
+    }
+  }
 
   if (state.finished) {
     return (
@@ -87,7 +97,15 @@ export function QuizClient({ questions }: QuizClientProps) {
         userAnswer={userAnswer}
         isLast={isLast}
         onNext={() => dispatch({ type: "NEXT" })}
+        showSubject={showSubject}
       />
+      <Button
+        variant="ghost"
+        className="w-full text-muted-foreground hover:text-foreground"
+        onClick={handleAbort}
+      >
+        Abbandona quiz
+      </Button>
     </div>
   );
 }

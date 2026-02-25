@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { QuizQuestion } from "@/types";
 
 type AnswerKey = "A" | "B" | "C";
@@ -13,6 +14,7 @@ interface QuizCardProps {
   userAnswer?: UserAnswer;
   isLast: boolean;
   onNext: () => void;
+  showSubject: boolean;
 }
 
 const OPTIONS: AnswerKey[] = ["A", "B", "C"];
@@ -52,6 +54,7 @@ export function QuizCard({
   userAnswer,
   isLast,
   onNext,
+  showSubject,
 }: QuizCardProps) {
   const answered = userAnswer !== undefined;
 
@@ -59,12 +62,14 @@ export function QuizCard({
     <div className="space-y-6">
       {/* Badges */}
       <div className="flex flex-wrap items-center gap-2">
-        <span
-          className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
-          style={{ backgroundColor: question.subjectColor }}
-        >
-          {question.subjectName}
-        </span>
+        {showSubject && (
+          <span
+            className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+            style={{ backgroundColor: question.subjectColor }}
+          >
+            {question.subjectName}
+          </span>
+        )}
         <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
           {question.source.replace(/_/g, " ")}
         </span>
@@ -100,12 +105,9 @@ export function QuizCard({
 
       {/* Next button */}
       {answered && (
-        <button
-          onClick={onNext}
-          className="w-full rounded-lg bg-primary px-4 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
+        <Button onClick={onNext} size="lg" className="w-full">
           {isLast ? "Vedi risultati" : "Prossima →"}
-        </button>
+        </Button>
       )}
     </div>
   );

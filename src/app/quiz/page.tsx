@@ -3,7 +3,7 @@ import { getQuizQuestions } from "@/lib/actions";
 import { QuizClient } from "@/components/quiz-client";
 
 interface QuizPageProps {
-  searchParams: Promise<{ subjects?: string; count?: string }>;
+  searchParams: Promise<{ subjects?: string; count?: string; showSubject?: string }>;
 }
 
 export default async function QuizPage({ searchParams }: QuizPageProps) {
@@ -14,6 +14,7 @@ export default async function QuizPage({ searchParams }: QuizPageProps) {
     : [];
   const count = parseInt(params.count ?? "15", 10);
   const safeCount = isNaN(count) || count < 1 ? 15 : count;
+  const showSubject = params.showSubject === "1";
 
   const questions = await getQuizQuestions(slugs, safeCount);
 
@@ -35,7 +36,7 @@ export default async function QuizPage({ searchParams }: QuizPageProps) {
 
   return (
     <div>
-      <QuizClient questions={questions} />
+      <QuizClient questions={questions} showSubject={showSubject} />
     </div>
   );
 }

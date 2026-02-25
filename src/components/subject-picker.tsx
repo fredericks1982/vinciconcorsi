@@ -16,6 +16,7 @@ export function SubjectPicker({ subjects }: SubjectPickerProps) {
     subjects.map((s) => s.slug)
   );
   const [count, setCount] = useState(30);
+  const [showSubject, setShowSubject] = useState(false);
 
   const totalAvailable = useMemo(
     () =>
@@ -48,6 +49,7 @@ export function SubjectPicker({ subjects }: SubjectPickerProps) {
     const params = new URLSearchParams({
       subjects: selected.join(","),
       count: String(Math.min(count, totalAvailable)),
+      ...(showSubject && { showSubject: "1" }),
     });
     router.push(`/quiz?${params.toString()}`);
   };
@@ -123,8 +125,32 @@ export function SubjectPicker({ subjects }: SubjectPickerProps) {
         })}
       </div>
 
+      {/* Show subject toggle */}
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          role="checkbox"
+          aria-checked={showSubject}
+          onClick={() => setShowSubject((v) => !v)}
+          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+            showSubject
+              ? "border-primary bg-primary"
+              : "border-muted-foreground/40"
+          }`}
+        >
+          {showSubject && (
+            <Check className="h-2.5 w-2.5 text-primary-foreground" />
+          )}
+        </button>
+        <label
+          className="cursor-pointer select-none text-sm text-muted-foreground"
+          onClick={() => setShowSubject((v) => !v)}
+        >
+          Mostra argomento nelle domande
+        </label>
+      </div>
+
       {/* Controls row */}
-      <div className="mt-6 flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4">
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4">
         <div className="flex items-center gap-3">
           <label htmlFor="count" className="shrink-0 text-sm font-medium">
             Numero domande
